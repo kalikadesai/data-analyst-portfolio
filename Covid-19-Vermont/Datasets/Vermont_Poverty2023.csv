@@ -1,0 +1,15 @@
+FIPS_Code,county,Rural_Urban_Continuum_Code_2023,Urban_Influence_Code_2024,POVALL_2023,PCTPOVALL_2023,MEDHHINC_2023,Rural_Urban
+50001,Addison ,6,6,"3,010",8.7,"82,234",Rural
+50003,Bennington ,6,5,"4,272",11.9,"67,124",Rural
+50005,Caledonia ,9,8,"4,192",14.0,"64,229",Rural
+50007,Chittenden ,3,4,"12,459",7.8,"96,142",Urban
+50009,Essex ,9,9,864,14.4,"58,359",Rural
+50011,Franklin ,3,4,"4,955",9.9,"85,765",Urban
+50013,Grand Isle ,3,4,650,8.7,"82,896",Urban
+50015,Lamoille ,8,6,"2,461",9.6,"72,811",Rural
+50017,Orange ,9,7,"2,851",9.7,"73,771",Rural
+50019,Orleans ,9,9,"3,764",14.1,"59,906",Rural
+50021,Rutland ,7,7,"6,900",11.8,"62,634",Rural
+50023,Washington ,4,5,"5,022",8.6,"79,916",Rural
+50025,Windham ,7,7,"4,506",10.1,"64,436",Rural
+50027,Windsor ,7,7,"5,686",9.9,"77,932",Rural
