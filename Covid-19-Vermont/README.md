@@ -15,12 +15,12 @@ Each group was tasked with examining the Covid-19 story of a partciular state wi
 ## Datasets
 All datasets are on the county level within the state of Vermont. Sources include New York Times, U.S. Bureau of Labor Statistics, Vermont's Department of Health, and U.S. Department of Agriculture.
 * [NYT Covid-19 Data](https://github.com/nytimes/covid-19-data/blob/master/us-counties.csv)
-* [Education Data](Datasets/Vermont_Education.csv)
-* [Income Data](Datasets/Vermont_Unemployment.csv)
-* [Poverty Data](Datasets/Vermont_Poverty2023.csv)
-* [Demographics Data](Datasets/Vermont_Demographics.csv)
-* [Vaccination Data](Datasets/vaccinations.csv)
-* [Mask Use Data](Datasets/mask-use-by-county.csv)
+* [Education Data](https://github.com/kalikadesai/data-analyst-portfolio/blob/main/Covid-19-Vermont/Datasets/Vermont_Education.csv)
+* [Income Data](https://github.com/kalikadesai/data-analyst-portfolio/blob/main/Covid-19-Vermont/Datasets/Vermont_Unemployment.csv)
+* [Poverty Data](https://github.com/kalikadesai/data-analyst-portfolio/blob/main/Covid-19-Vermont/Datasets/Vermont_Poverty2023.csv)
+* [Demographics Data](https://github.com/kalikadesai/data-analyst-portfolio/blob/main/Covid-19-Vermont/Datasets/Vermont_Demographics.csv)
+* [Vaccination Data](https://github.com/kalikadesai/data-analyst-portfolio/blob/main/Covid-19-Vermont/Datasets/vaccinations.csv)
+* [Mask Use Data](https://github.com/kalikadesai/data-analyst-portfolio/blob/main/Covid-19-Vermont/Datasets/mask-use-by-county.csv)
 
 ## Conclusions and Limitations
 Vermont had a very early and strict response to COVID-19 from the state government. In addition to this, the entire population of Vermont strongly adhered to the set guidelines. This can be seen with high mask usage and vaccination rates. On average, 66% of the population always wore a mask during the official mask mandate period. Additionally, 85% of the population is fully vaccinated, one of the highest vaccination rates in the country. These statistics are regardless of county. We found that Vermont is a very homogeneous state with little variation in variables on the county level. Due to this, it was difficult to analyze the true effects of masks and vaccines on the COVID cases and deaths. Therefore, we found that seasonality was the largest predictor in determining the peaks and falls in cases. This means that during the holiday season when people were naturally indoors, gathering, and traveling more is when we saw the most notable changes in cases and deaths. Overall, Vermont had a very strong reaction to COVID which allowed them to minimize the negative effects.
