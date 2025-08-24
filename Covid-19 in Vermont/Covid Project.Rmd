@@ -1,0 +1,285 @@
+---
+title: "Vermont Covid-19 Project"
+output:
+  html_document:
+    df_print: paged
+date: "May 1, 2025"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Step 1 - Attach Necessary Libraries
+```{r set up workspace}
+library(tidyverse)
+library(zoo)
+library(skimr)
+library(gridExtra)
+library(infer)
+library(moderndive)
+```
+
+
+## Step 2 - Loading Datasets
+```{r}
+counties <- read.csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv")
+
+poverty <- read.csv("~/Documents/GitHub Portfolio/Coivd Project/Vermont_Poverty2023.csv")
+
+education <- read.csv("~/Documents/GitHub Portfolio/Coivd Project/Vermont_Education.csv")
+
+unemployment <- read.csv("~/Documents/GitHub Portfolio/Coivd Project/Vermont_Unemployment.csv")
+
+demog <- read.csv("~/Documents/GitHub Portfolio/Coivd Project/Vermont_Demographics.csv") 
+
+vax <- read.csv("~/Documents/GitHub Portfolio/Coivd Project/vaccinations.csv")
+
+mask_use <- read.csv("~/Documents/GitHub Portfolio/Coivd Project/mask-use-by-county.csv")
+```
+
+
+## Step 3 - Cleaning and Combining Data
+```{r}
+vt <- counties %>%
+  filter(state == "Vermont")
+
+vt <- vt %>%
+  group_by(county) %>%
+  mutate(new_cases = cases - lag(cases, default = 0, order_by = date),
+         new_deaths = deaths - lag(deaths, default = 0, order_by = date),
+         new_cases_07_day = rollmean(new_cases, k = 7, fill = NA),
+         new_deaths_07_day = rollmean(new_deaths, k = 7, fill = NA))
+
+poverty <- poverty %>%
+  mutate(county = str_trim(county))
+education <- education %>%
+  mutate(county = str_trim(county))
+unemployment <- unemployment %>%
+  mutate(county = str_trim(county))
+demog <- demog %>%
+  mutate(county = str_trim(county))
+
+vt_extra <- left_join(poverty, education, by = "county") %>%
+  left_join(unemployment, by = "county") %>%
+  left_join(vax, by = "county") %>%
+  left_join(demog, by = "county") %>%
+  left_join(mask_use, by = "FIPS_Code")
+
+vt_extra <- vt_extra %>%
+  mutate(PCT_always = ALWAYS * 100)
+
+comma_cols <- vt_extra %>%
+  select(where(is.character)) %>%
+  select(where(~ any(grepl(",", .)))) %>%
+  names()
+
+vt_extra <- vt_extra %>%
+  mutate(across(all_of(comma_cols), ~ as.numeric(gsub(",", "", .))))
+
+vt_cov <- left_join(vt, vt_extra, by = "county")
+vt_cov <- vt_cov %>%
+  mutate(cases_per_100000 = (cases / Population) * 100000,
+         deaths_per_100000 = (deaths / Population) * 100000)
+vt_cov <- vt_cov %>%
+  filter(county != "Unknown")
+vt_cov$date <- as.Date(vt_cov$date)
+```
+
+
+## Step 4 - Exploratory Data Analysis
+### Outcome Variables
+```{r}
+glimpse(vt)
+```
+```{r}
+summary(vt)
+```
+
+
+### Explanatory Variables
+```{r}
+glimpse(vt_extra)
+```
+```{r}
+summary(vt_extra)
+```
+
+
+### Bivariate Charts
+#### Vaccination Rates vs Cases and Deaths
+```{r}
+vax1 <- ggplot(vt_cov, aes(x = PCT_fully_vaccinated, y = new_cases)) +
+  geom_point() +
+  labs(title = "New Cases", x = "Percent Fully Vaxxed", y = "Cases")
+vax2 <- ggplot(vt_cov, aes(x = PCT_fully_vaccinated, y = new_deaths)) +
+  geom_point() +
+  labs(title = "New Deaths", x = "Percent Fully Vaxxed", y = "Deaths")
+vax3 <- ggplot(vt_cov, aes(x = PCT_fully_vaccinated, y = cases_per_100000)) +
+  geom_point() +
+  labs(title = "Cases Per 100000", x = "Percent Fully Vaxxed", y = "Cases")
+vax4 <- ggplot(vt_cov, aes(x = PCT_fully_vaccinated, y = deaths_per_100000)) +
+  geom_point() +
+  labs(title = "Deaths per 100000", x = "Percent Fully Vaxxed", y = "Deaths")
+grid.arrange(vax1, vax2, vax3, vax4, top = "Percent Fully Vaccinated Plots")
+```
+
+Vaccination rates and peak new cases and new deaths, respectively, do not seem to have any strong correlations. Both cases per 100000 and deaths per 100000 seem to have a negative correlation with percent fully vaccinated. This indicates that as percent vaccinated increases, the number of cases and deaths per 100000 decreases. This loosely speaks to the postive effects of the Covid vaccine. 
+
+
+#### Mask Use vs Cases and Deaths
+```{r}
+mask1 <- ggplot(vt_cov, aes(x = PCT_always, y = new_cases)) +
+  geom_point() +
+  labs(title = "New Cases", x = "Percent Mask", y = "Cases")
+mask2 <- ggplot(vt_cov, aes(x = PCT_always, y = new_deaths)) +
+  geom_point() +
+  labs(title = "New Deaths", x = "Percent Mask", y = "Deaths")
+mask3 <- ggplot(vt_cov, aes(x = PCT_always, y = cases_per_100000)) +
+  geom_point() +
+  labs(title = "Cases Per 100000", x = "Percent Mask", y = "Cases")
+mask4 <- ggplot(vt_cov, aes(x = PCT_always, y = deaths_per_100000)) +
+  geom_point() +
+  labs(title = "Deaths per 100000", x = "Percent Mask", y = "Deaths")
+grid.arrange(mask1, mask2, mask3, mask4, top = "Percent Always Wears a Mask Plots")
+```
+
+Percent of the population that claims they always wear a mask does not seem to have a strong correlation with any of the outcome variables here. This is surprising because we would have expected higher mask use to relate to lower case numbers. 
+
+
+#### Household Income vs Cases and Deaths
+```{r}
+inc1 <- ggplot(vt_cov, aes(x = Median_Household_Income_2022, y = cases_per_100000)) +
+  geom_point() +
+  labs(title = "Cases Per 100000", x = "Income", y = "Cases")
+inc2 <- ggplot(vt_cov, aes(x = Median_Household_Income_2022, y = deaths_per_100000)) +
+  geom_point() +
+  labs(title = "Deaths Per 100000", x = "Income", y = "Deaths")
+grid.arrange(inc1, inc2, nrow = 2, top = "Median Household Income Plots")
+
+```
+
+Median household income and deaths per 100000 seem to have a slight negative relation, with an unexpected peak at around $70,000. This would mean as income increases, deaths decrease. This could make sense as higher income households might have been able to better afford staying indoors and isolated during the pandemic. 
+
+
+#### Education Level vs Cases and Deaths
+```{r}
+edu1 <- ggplot(vt_cov, aes(x = PCT_HS_graduate, y = new_cases)) +
+  geom_point() +
+  labs(title = "New Cases", x = "Percent HS", y = "Cases")
+edu2 <- ggplot(vt_cov, aes(x = PCT_HS_graduate, y = new_deaths)) +
+  geom_point() +
+  labs(title = "New Deaths", x = "Percent HS", y = "Deaths")
+edu3 <- ggplot(vt_cov, aes(x = PCT_HS_graduate, y = cases_per_100000)) +
+  geom_point() +
+  labs(title = "Cases Per 100000", x = "Percent HS", y = "Cases")
+edu4 <- ggplot(vt_cov, aes(x = PCT_HS_graduate, y = deaths_per_100000)) +
+  geom_point() +
+  labs(title = "Deaths per 100000", x = "Percent HS", y = "Deaths")
+grid.arrange(edu1, edu2, edu3, edu4, top = "Percent High School Graduate Only Plots")
+```
+
+Again, here it is interesting to see that there doesn't appear to be any strong correlation between the outcome and explanatory variables. This indicates that the percent of only high school graduates did not affect the Covid case and death data.
+
+
+## Step 5 - Cases and Deaths in Depth
+### Linear Regression
+```{r}
+ggplot(vt_cov, aes(x = cases, y = deaths)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Linear Regression for Cases and Deaths", x = "Cases", y = "Deaths")
+
+cd_lm <- lm(formula = deaths ~ cases, data = vt_cov)
+get_regression_table(cd_lm)
+```
+
+As we can clearly see by the blue regression line, there is a positive correlation between
+cases and deaths. The estimate is positive and the standard error and p-value are both very small. Altogether, this indicates that our result is statistically significant, meaning that there is evidence of a positive correlation between cases and deaths. This is an expected result because in general, as cases increase, deaths will naturally increase as well.
+
+
+### Hypothesis Test
+```{r}
+cd_obs_stat <- cor(vt_cov$cases, vt_cov$deaths)
+
+cd_distribution <- vt_cov %>%
+  specify(response = deaths, explanatory = cases) %>%
+  hypothesise(null = "independence") %>%
+  generate(reps = 1000, type = "permute") %>%
+  calculate(stat = "correlation")
+
+visualise(cd_distribution) +
+  shade_p_value(obs_stat = cd_obs_stat, direction = "right")
+
+cd_distribution %>%
+  get_p_value(obs_stat = cd_obs_stat, direction = "right")
+```
+
+To further confirm our result of a positive correlation between cases and deaths, we ran a hypothesis test. The null hypothesis being that there is no correlation between cases and deaths. The alternative hypothesis being that the correlation coefficient of cases and deaths is positive. Formally: $H_0: \rho = 0$ and $H_A: \rho > 0$. The observed correlation coefficient between cases and deaths is $\hat{\rho} = 0.89$. This is a good indication of a strong, positive correlation. The red vertical line represents that observed correlation. As seen, there is no overlap between the observed value and the distribution under the null hypothesis. In addition, the calculated p-value is 0, which is less than our significance level of 0.05. Therefore, we are able to reject the null hypothesis. This is evidence that there is a strong, positive correlation between cases and deaths. Again, this is an expected result and our most basic investigation of variables.
+
+
+## Step 6 - Mask Mandate in Depth
+### Exploratory Plots
+```{r}
+mask_order_date <- as.Date("2020-08-01")
+
+masks<-vt_cov%>%filter(date>=mask_order_date-28&date<mask_order_date)%>%
+  mutate(masks=FALSE)%>%bind_rows(vt_cov%>%filter(date>mask_order_date+10&date<=mask_order_date+38)%>%mutate(masks=TRUE))
+
+ggplot(vt_cov, aes(x = date, y = deaths_per_100000, group = county, color = county)) +
+  geom_line() +
+  geom_vline(xintercept = as.Date("2020-08-01"), color = "red") +
+  geom_text(aes(x=as.Date(c("2020-08-01")),
+    label="8/1/2020\n", y = 170),
+    color="black", angle = 90) +
+  labs(title = "Deaths per 100000 Over Time", x = "Date", y = "Deaths per 100000", color = "County")
+ggplot(masks, aes(x = date, y = deaths_per_100000, group = county, color = county)) +
+  geom_line() +
+  geom_vline(xintercept = as.Date("2020-08-01"), color = "red") +
+  geom_text(aes(x=as.Date(c("2020-08-01")),
+    label="8/1/2020\n", y = 20),
+    color="black", angle = 90) +
+  labs(title = "Deaths per 100000 Over Two Months", x = "Date", y = "Deaths per 100000", color = "County")
+```
+
+The first figure is an overall line plot of the deaths per 100,000 over the course of the pandemic. The red vertical line at August 1, 2020 represents the mask mandate. As stated above, we were interested in the 30 days before and after this August date. The second figure is the zoomed in plot of the time period we were investigating. Again, the red vertical line represents the mask mandate. As seen, the death rate stays almost completely constant for all counties before and after the mask mandate. This is an early indication that the mask mandate did not affect the average deaths per 100,000.
+
+
+### Hypothesis Test
+```{r}
+m_a <-masks%>%ungroup()%>%filter(date>mask_order_date&date+10<=mask_order_date+38)%>%
+  summarise(mean_deaths_100k=mean(deaths_per_100000))
+
+m_b <-masks%>%ungroup()%>%filter(date>=mask_order_date-28&date<mask_order_date)%>%summarise(mean_deaths_100k=mean(deaths_per_100000))
+
+mask_distribution <- masks %>%
+  specify(formula = deaths_per_100000 ~ masks) %>%
+  hypothesise(null = "independence") %>%
+  generate(reps = 1000, type = "permute") %>%
+  calculate(stat = "diff in means", order = c("TRUE", "FALSE"))
+m_obs_diff <- m_a - m_b
+visualise(mask_distribution) +
+  shade_p_value(obs_stat = m_obs_diff, direction = "left")
+
+mask_distribution %>%
+  get_p_value(obs_stat = m_obs_diff, direction = "left")
+```
+
+To confirm the indications of the line plot, we ran a hypothesis test. The null hypothesis being that the difference in average deaths per 100,000 after and before the mask mandate was zero. The alternative hypothesis being that the average deaths per 100,000 after the mask mandate was less than the average deaths before. Formally: $H_0: \mu_A - \mu_B = 0$ and $H_A: \mu_A - \mu_B < 0$. The test statistic being the difference in average deaths per 100,000 after and before the mask mandate. The calculated observed value is $\hat{\mu}_A - \hat{\mu}_B = 0.26$. This is very close to zero, another indication that the difference is not significant. To prove this, the value is represented by the red vertical line. There is clearly a large overlap between the observed value and the distribution under the null hypothesis. In addition, the calculated p-value is around 0.722, which is far greater than our significance level of 0.05. Therefore, we fail to reject the null hypothesis. This means that there is evidence the difference in average deaths is not significant. In other words, the mask mandate did not have an effect on the average deaths. This is a surprising result because we would have expected the mask mandate to decrease cases and in turn decrease the average deaths.
+
+
+### Confidence Interval
+```{r}
+mask_boot_dist <- masks %>%
+  specify(formula = deaths_per_100000 ~ masks) %>%
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat = "diff in means", order = c("TRUE", "FALSE"))
+
+mask_ci <- mask_boot_dist %>%
+  get_confidence_interval(type = "percentile", level = 0.95)
+
+visualise(mask_boot_dist) +
+  shade_confidence_interval(mask_ci)
+```
+
+To further support our decision to fail to reject the null hypothesis, we constructed a 95% confidence interval. The calculated confidence interval is (-0.615, 2.12). Since zero is within the confidence 6 interval, this supports our conclusion. This is also illustrated by the figure. The bootstrap sample creates an approximately normal distribution and the confidence interval is highlighted in green. Once more, zero is within the confidence interval, indicating that the mask mandate did not have an effect on the average deaths per 100,000.
