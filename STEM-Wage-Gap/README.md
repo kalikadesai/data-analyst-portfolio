@@ -19,5 +19,5 @@ Due to the statistically insignificant results of the Linear Mixed-Effects Model
 
 ## Full Report
 You can view the full analysis, including code and plots here:
-[View STEM Wage Gap Report](Covid-Project.html)
+[View STEM Wage Gap Report](STEM-Wage_Gap.html)
 
