@@ -1,4 +1,4 @@
-## Covid-19 in Vermont
+## Analysis of Covid-19 in Vermont
 ###### Note: this was a semester-long partner project I completed for a university statistics course. Only my contributions to the project are included here.
 
 ## Summary
