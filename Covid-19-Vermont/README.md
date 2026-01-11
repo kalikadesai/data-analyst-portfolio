@@ -17,7 +17,7 @@ Each group was tasked with examining the Covid-19 story of a partciular state wi
 All datasets are on the county level within the state of Vermont. Sources include New York Times, U.S. Bureau of Labor Statistics, Vermont's Department of Health, and U.S. Department of Agriculture.
 * [NYT Covid-19 Data](https://github.com/nytimes/covid-19-data/blob/master/us-counties.csv)
 * [Education Data](https://github.com/kalikadesai/data-analyst-portfolio/blob/main/Covid-19-Vermont/Datasets/Vermont_Education.csv)
-* [Education Data](Datasets/Vermont_Education.csv)
+* [Education Data](https://github.com/kalikadesai/data-analyst-portfolio/blob/main/Covid-19-Vermont/Datasets/Vermont_Education.csv)
 * [Income Data](https://github.com/kalikadesai/data-analyst-portfolio/blob/main/Covid-19-Vermont/Datasets/Vermont_Unemployment.csv)
 * [Poverty Data](https://github.com/kalikadesai/data-analyst-portfolio/blob/main/Covid-19-Vermont/Datasets/Vermont_Poverty2023.csv)
 * [Demographics Data](https://github.com/kalikadesai/data-analyst-portfolio/blob/main/Covid-19-Vermont/Datasets/Vermont_Demographics.csv)
