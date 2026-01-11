@@ -10,6 +10,7 @@ Each group was tasked with finding an interesting dataset to explore using linea
 * Transform any necessary variables
 * Create multiple linear regression models
 * Conduct hypothesis tests
+* Construct confidence intervals
 * Create data visualization to illustrate findings
 
 ## Datasets
