@@ -23,4 +23,4 @@ Looking at developed countries, we can see that the effects of polio vaccination
 
 ## Full Report
 You can view the full analysis, including code and plots here:
-[View Covid-19 Vermont Report](Predicting-Life-Expectancy.html)
+[View Life Expectancy Report](Predicting-Life-Expectancy.html)
