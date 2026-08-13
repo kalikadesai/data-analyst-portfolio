@@ -17,5 +17,5 @@ The model I use to determine insurance premiums during wartime is conservative, 
 
 ## Full Report
 You can view the full analysis, including code and plots here:
-[View Risk Analysis in Strait of Hormuz Report](Risk-Analysis-Strait-of-Hormuz.html)
+[View Risk Analysis in Strait of Hormuz Report](Strait-of-Hormuz.html)
 
